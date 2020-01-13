@@ -42,4 +42,39 @@ describe('Test routes', () => {
             })
             .catch()
     })
+
+    describe('GET /bookmarks/:id', () => {
+        const testBookmark = { url: 'https://nodejs.org/', title: 'Node.js' };
+        beforeEach((done) => connection.query(
+            'TRUNCATE bookmark', () => connection.query(
+                'INSERT INTO bookmark SET ?', testBookmark, done
+            )
+        ));
+
+        it('GET /bookmarks:id - OK', (done) => {
+            request(app)
+                .get('/bookmarks/1')
+                .expect(200)
+                .expect('Content-Type', /json/)
+                .then(response => {
+                    const expected = { id: 1, url: 'https://nodejs.org/', title: 'Node.js' }
+                    expect(response.body).toEqual(expected)
+                    done()
+                })
+        })
+
+        it('GET /bookmarks:id - error', (done) => {
+            request(app)
+                .get('/bookmarks/2')
+                .expect(404)
+                .expect('Content-Type', /json/)
+                .then(response => {
+                    const expected = { error: 'Bookmark not found' }
+                    expect(response.body).toEqual(expected)
+                    done()
+                })
+
+        })
+    });
+
 });
